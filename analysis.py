@@ -1,12 +1,12 @@
 #---------------Portfolio Health-----------------
-#PAR Rate
-par_30 = credit[credit['days_past_due'] >= 30]['balance'].sum()
-par_60 = credit[credit['days_past_due']>=60]['balance'].sum()
-par_90 = credit[credit['days_past_due']>=90]['balance'].sum()
+#PAR Rate 
+par_30 = credit[credit['days_past_due'] >= 30]['balance'].sum()/credit['balance'].sum()
+par_60 = credit[credit['days_past_due']>=60]['balance'].sum()/credit['balance'].sum()
+par_90 = credit[credit['days_past_due']>=90]['balance'].sum()/credit['balance'].sum()
 
-print(f"Portfolio at Risk (PAR) - 30 days: KES {par_30:,}")
-print(f"Portfolio at Risk (PAR) - 60 days: KES {par_60:,}")
-print(f"Portfolio at Risk (PAR) - 90 days: KES {par_90:,}")
+print(f"Portfolio at Risk (PAR) - 30 days: {par_30:.2%}")
+print(f"Portfolio at Risk (PAR) - 60 days: {par_60:.2%}")
+print(f"Portfolio at Risk (PAR) - 90 days: {par_90:.2%}")
 
 #Impaired Rate
 credit["impaired_flag"] = credit["days_past_due"] > 0
