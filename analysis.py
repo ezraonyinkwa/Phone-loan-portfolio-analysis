@@ -80,3 +80,53 @@ plt.xticks(rotation=45)
 plt.tight_layout()
 plt.show()
 
+#-------------------Credit Outcomes × Customer Experience-------------------------------
+#nps score calculation column
+nps['nps_score'] = nps['have_you_ever_experienced_a_delay_in_your_payment_reflecting_in_your_mophones_account?'].map({'Yes': 1, 'No': 0})
+#Join NPS dataset with the credit dataset on the loan_id column to analyze the relationship between customer experience and credit outcomes
+credit_nps = credit.merge(nps[['loan_id', 'nps_score']], on='loan_id', how='left')
+
+#correlation between NPS and Default Rate by month
+nps_monthly = credit_nps.groupby('date')['nps_score'].mean()
+default_rate_monthly = credit_nps.groupby('date').apply(lambda x: x[x['days_past_due'] >= 90]['balance'].sum() / x['balance'].sum())
+correlation = nps_monthly.corr(default_rate_monthly)
+print(f"Correlation between NPS and Default Rate: {correlation:.2f}")
+
+#Is there arelationship between credit performance (e.g. arrears,default, account status) and customer satisfaction.
+credit_nps['arrears_status'] = credit_nps['days_past_due'] > 0
+correlation_arrears_nps = credit_nps['arrears_status'].corr(credit_nps['nps_score'])
+print(f"Correlation between Arrears Status and NPS Score: {correlation_arrears_nps:.2f}") 
+
+#Overall customer satisfaction score
+overall_nps_score = credit_nps['nps_score'].mean()*100
+print(f"Overall NPS Score: {overall_nps_score:.2f}%")
+
+#Correlation between phone pricing and customer satisfaction
+#Merging the sales details dataset with the credit_nps dataset to get the phone pricing for each customer in the credit_nps dataset
+credit_nps_sales = credit_nps.merge(sales_details[['loan_id', 'loan_price']], on='loan_id', how='left')
+correlation_price_nps = credit_nps_sales['loan_price'].corr(credit_nps_sales['nps_score'])
+print(f"Correlation between Loan Price and NPS Score: {correlation_price_nps:.2f}")    
+
+
+#Tension between collections effectiveness and customer experience
+collections_effectiveness = credit_nps.groupby('date').apply(lambda x: x[x['days_past_due'] >= 30]['balance'].sum() / x['balance'].sum())
+
+print("Collections Effectiveness (PAR Rate) and Average NPS Score by Month:")
+collections_nps = pd.DataFrame({
+    'Collections Effectiveness (PAR Rate)': collections_effectiveness,
+    'Average NPS Score': nps_monthly
+})
+print(collections_nps)
+
+#Bar chart to show the relationship between collections effectiveness and customer experience
+collections_nps.plot(kind='bar', figsize=(10, 6))
+plt.title('Collections Effectiveness (PAR Rate) and Average NPS Score by Month')
+plt.xlabel('Snapshot Date')
+plt.ylabel('Value')
+plt.xticks(rotation=45)
+plt.tight_layout()
+plt.show()
+
+
+
+
