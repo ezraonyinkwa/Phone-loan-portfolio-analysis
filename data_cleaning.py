@@ -49,11 +49,6 @@ customer_dob['provider']=customer_dob['provider'].str.strip().str.capitalize()
 #Quality check after standardization
 customer_dob['provider'].unique()
 
-# Datetimeconversion of the date of birth column
-customer_dob['date_of_birth'] = pd.to_datetime(customer_dob['date_of_birth'], errors='coerce') #--Change the date format to datetime and handle errors by coercing them to NaT
-#Quality check after format change-If it worked
-customer_dob['date_of_birth'].dtype
-
 
 
 #Drop Columns that are not needed for the analysis in the credit dataset
